@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Jars — iOS App</title>
+  <meta name="description" content="My Jars is a beautiful, private iOS app for collecting the things you want to remember. Built with SwiftUI. No account. No data collected." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:       #FDF6EE;
+      --amber:       #B07D4A;
+      --amber-light: #E8C98A;
+      --amber-pale:  #FDF0DC;
+      --dark:        #3D2B1F;
+      --mid:         #9A6B46;
+      --muted:       rgba(61,43,31,0.5);
+      --border:      rgba(176,125,74,0.15);
+      --card:        #FFF9F3;
+      --font-serif:  'Lora', Georgia, serif;
+      --font-sans:   'DM Sans', system-ui, sans-serif;
+      --font-mono:   'DM Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--cream);
+      color: var(--dark);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    a { color: var(--amber); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Animations ──────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade { opacity: 0; animation: fadeUp 0.6s ease forwards; }
+    .d1 { animation-delay: 0.05s; }
+    .d2 { animation-delay: 0.15s; }
+    .d3 { animation-delay: 0.25s; }
+    .d4 { animation-delay: 0.38s; }
+
+    /* ── Layout ──────────────────────────────── */
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ──────────────────────────────── */
+    header {
+      padding: 52px 0 44px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .logo-block { display: flex; align-items: center; gap: 16px; }
+
+    /* ── App icon — uses your own icon.png file ── */
+    /* Place icon.png in the same folder as index.html */
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--amber); /* fallback colour if icon.png is missing */
+    }
+    .logo-icon img {
+      width: 56px;
+      height: 56px;
+      display: block;
+      border-radius: 14px;
+    }
+    /* Fallback SVG shown only if icon.png hasn't been added yet */
+    .logo-icon-fallback {
+      width: 56px; height: 56px;
+      background: var(--amber);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon-fallback svg { width: 30px; height: 30px; }
+
+    .logo-text h1 {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--dark);
+      line-height: 1.1;
+    }
+    .logo-text p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 3px;
+      letter-spacing: 0.04em;
+    }
+    .header-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      font-family: var(--font-mono);
+    }
+    .badge svg { width: 12px; height: 12px; }
+    .badge-green  { background: #e8f5e9; color: #2e7d32; }
+    .badge-blue   { background: #e3f2fd; color: #1565c0; }
+    .badge-amber  { background: var(--amber-pale); color: var(--amber); }
+    .badge-purple { background: #f3e5f5; color: #6a1b9a; }
+
+    /* ── Hero ────────────────────────────────── */
+    .hero { padding: 64px 0 56px; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 56px;
+      align-items: center;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--amber);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--dark);
+      margin-bottom: 20px;
+    }
+    .hero h2 em { font-style: italic; color: var(--amber); }
+    .hero-body {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 32px;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      transition: transform 0.15s, opacity 0.15s;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-1px); text-decoration: none; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-dark:hover { opacity: 0.88; }
+    .btn-outline {
+      background: transparent;
+      color: var(--amber);
+      border: 1.5px solid var(--amber-light);
+    }
+    .btn-outline:hover { background: var(--amber-pale); }
+
+    /* ── Phone mockup ─────────────────────────── */
+    .hero-phone { display: flex; justify-content: center; }
+    .phone-frame {
+      width: 220px;
+      background: #1c1c1e;
+      border-radius: 36px;
+      box-shadow: 0 0 0 1.5px #3a3a3c, 0 24px 60px rgba(61,43,31,0.22);
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 7px; left: 50%; transform: translateX(-50%);
+      width: 70px; height: 20px;
+      background: #111; border-radius: 11px; z-index: 10;
+    }
+    .phone-screen {
+      margin: 3px;
+      border-radius: 33px;
+      background: #FDF6EE;
+      overflow: hidden;
+    }
+
+    /* ── Sections ─────────────────────────────── */
+    section { padding: 56px 0; border-top: 1px solid var(--border); }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--amber);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+      font-weight: 500;
+      color: var(--dark);
+      margin-bottom: 12px;
+    }
+    .section-title em { font-style: italic; color: var(--amber); }
+    .section-body {
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 580px;
+      line-height: 1.75;
+    }
+
+    /* ── Features grid ────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 40px;
+    }
+    .feature-cell {
+      background: var(--card);
+      padding: 24px 22px;
+      transition: background 0.18s;
+    }
+    .feature-cell:hover { background: var(--amber-pale); }
+    .feature-icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      background: var(--amber-pale);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .feature-icon svg { width: 18px; height: 18px; }
+    .feature-cell h3 { font-size: 0.9rem; font-weight: 500; color: var(--dark); margin-bottom: 5px; }
+    .feature-cell p  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── Tech stack ───────────────────────────── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 36px;
+      max-width: 640px;
+    }
+    .stack-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .stack-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--amber);
+      background: var(--amber-pale);
+      border: 1px solid var(--amber-light);
+      border-radius: 5px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .stack-item-body h4 { font-size: 0.88rem; font-weight: 500; color: var(--dark); margin-bottom: 3px; }
+    .stack-item-body p  { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── Privacy ──────────────────────────────── */
+    .privacy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 36px;
+    }
+    .privacy-card {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 20px;
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 12px;
+    }
+    .privacy-card svg { width: 20px; height: 20px; color: #2e7d32; flex-shrink: 0; margin-top: 1px; }
+    .privacy-card h4  { font-size: 0.88rem; font-weight: 500; color: #1b5e20; margin-bottom: 3px; }
+    .privacy-card p   { font-size: 0.8rem; color: #388e3c; line-height: 1.55; }
+
+    /* ── About ────────────────────────────────── */
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+      margin-top: 36px;
+    }
+    .about-text p { font-size: 0.95rem; color: var(--muted); line-height: 1.8; margin-bottom: 16px; }
+    .about-text p:last-child { margin-bottom: 0; }
+    .about-text strong { color: var(--dark); font-weight: 500; }
+    .timeline { list-style: none; }
+    .timeline li {
+      display: flex;
+      gap: 16px;
+      padding-bottom: 20px;
+      position: relative;
+    }
+    .timeline li:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 15px; top: 32px; bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+    .tl-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--amber-pale);
+      border: 1.5px solid var(--amber-light);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--amber);
+    }
+    .tl-content h4 { font-size: 0.88rem; font-weight: 500; color: var(--dark); margin-bottom: 2px; }
+    .tl-content p  { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── Support ──────────────────────────────── */
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 36px;
+    }
+    .support-card {
+      padding: 24px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      text-align: center;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .support-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(176,125,74,0.1); }
+    .support-card svg { width: 28px; height: 28px; color: var(--amber); margin: 0 auto 12px; display: block; }
+    .support-card h3  { font-size: 0.9rem; font-weight: 500; color: var(--dark); margin-bottom: 6px; }
+    .support-card p   { font-size: 0.8rem; color: var(--muted); line-height: 1.55; margin-bottom: 14px; }
+    .support-card a   { font-size: 0.82rem; font-weight: 500; color: var(--amber); }
+
+    /* ── Privacy policy box ───────────────────── */
+    .policy-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      margin-top: 36px;
+    }
+    .policy-box h3 {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--dark);
+      margin-bottom: 16px;
+    }
+    .policy-box p { font-size: 0.88rem; color: var(--muted); line-height: 1.75; margin-bottom: 12px; }
+    .policy-box p:last-child { margin-bottom: 0; }
+    .policy-box strong { color: var(--dark); font-weight: 500; }
+
+    /* ── Footer ───────────────────────────────── */
+    footer { border-top: 1px solid var(--border); padding: 36px 0; }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-left { display: flex; align-items: center; gap: 10px; }
+    .footer-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      overflow: hidden;
+      background: var(--amber);
+      flex-shrink: 0;
+    }
+    .footer-icon img { width: 28px; height: 28px; display: block; border-radius: 7px; }
+    .footer-icon-fallback {
+      width: 28px; height: 28px;
+      background: var(--amber);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .footer-icon-fallback svg { width: 15px; height: 15px; }
+    .footer-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--dark);
+    }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a { font-size: 0.82rem; color: var(--muted); }
+    .footer-links a:hover { color: var(--amber); text-decoration: none; }
+    .footer-copy { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── Responsive ───────────────────────────── */
+    @media (max-width: 720px) {
+      .hero-grid        { grid-template-columns: 1fr; }
+      .hero-phone       { display: none; }
+      .features-grid    { grid-template-columns: 1fr 1fr; }
+      .stack-grid       { grid-template-columns: 1fr; }
+      .privacy-grid     { grid-template-columns: 1fr; }
+      .about-inner      { grid-template-columns: 1fr; }
+      .support-grid     { grid-template-columns: 1fr; }
+      .footer-inner     { justify-content: center; text-align: center; }
+      .footer-links     { justify-content: center; }
+    }
+    @media (max-width: 480px) {
+      .features-grid  { grid-template-columns: 1fr; }
+      .header-inner   { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════
+       HEADER
+       ══════════════════════════════════════════════════════ -->
+  <header>
+    <div class="wrap">
+      <div class="header-inner">
+        <div class="logo-block fade d1">
+
+          <!--
+            APP ICON
+            ─────────────────────────────────────────────────
+            To use your own icon:
+            1. Name your icon file "icon.png"
+            2. Place it in the same folder as this index.html
+            3. The <img> tag below will load it automatically
+
+            If icon.png is not present the amber fallback
+            shows instead — so the page always looks correct.
+          -->
+          <div class="logo-icon">
+            <img src="icon.png" alt="My Jars app icon"
+                 onerror="this.parentElement.innerHTML='<div class=\'logo-icon-fallback\'><svg viewBox=\'0 0 30 30\' fill=\'none\'><rect x=\'4\' y=\'18\' width=\'22\' height=\'8\' rx=\'2.5\' fill=\'white\' opacity=\'0.9\'/><rect x=\'4\' y=\'10\' width=\'22\' height=\'8\' rx=\'2.5\' fill=\'white\' opacity=\'0.65\'/><rect x=\'4\' y=\'3\' width=\'22\' height=\'7\' rx=\'2.5\' fill=\'white\' opacity=\'0.4\'/></svg></div>'" />
+          </div>
+
+          <div class="logo-text">
+            <h1>My Jars</h1>
+            <p>iOS App &nbsp;·&nbsp; Personal Collections</p>
+          </div>
+        </div>
+
+        <div class="header-badges fade d2">
+          <span class="badge badge-blue">
+            <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 0C2.7 0 0 2.7 0 6s2.7 6 6 6 6-2.7 6-6S9.3 0 6 0zm.5 9H5.5V5.5h1V9zm0-4.5H5.5v-1h1v1z"/></svg>
+            SwiftUI
+          </span>
+          <span class="badge badge-green">
+            <svg viewBox="0 0 12 12" fill="currentColor" opacity=".85"><rect x="1" y="1" width="10" height="10" rx="2"/><path d="M3.5 6l2 2 3-3" stroke="white" stroke-width="1.3" fill="none"/></svg>
+            iOS 16+
+          </span>
+          <span class="badge badge-amber">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 1a4 4 0 0 1 3 7v2H3V8A4 4 0 0 1 6 1z"/><rect x="4" y="10" width="4" height="1.5" rx=".75"/></svg>
+            Free
+          </span>
+          <span class="badge badge-purple">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="10" height="10" rx="2"/><path d="M4 6l2 2 3-3"/></svg>
+            No data collected
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       HERO
+       ══════════════════════════════════════════════════════ -->
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-grid">
+
+        <!-- Left: copy -->
+        <div>
+          <p class="hero-eyebrow fade d1">Coming soon to the App Store</p>
+          <h2 class="fade d2">
+            A beautiful place to keep<br>
+            the things <em>worth keeping.</em>
+          </h2>
+          <p class="hero-body fade d3">
+            My Jars is a calm, private iOS app for collecting the things you want to
+            remember — gift ideas, recipes, travel dreams, quotes, and anything else
+            worth holding onto. Not a to-do list. Not a notes dump. Just your things,
+            in their own jars.
+          </p>
+          <div class="hero-actions fade d4">
+            <!--
+              Replace href="#" with your App Store URL when the app goes live.
+              Example: href="https://apps.apple.com/app/my-jars/id123456789"
+            -->
+            <a href="#" class="btn btn-dark">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M15.5 16.2c-.7 1-1.4 2-2.5 2s-1.5-.7-2.8-.7c-1.3 0-1.7.7-2.7.7s-1.8-1.1-2.6-2.1C3.4 14.3 2.4 11 3.9 8.5c.7-1.3 2-2.1 3.4-2.1 1.1 0 2.1.7 2.7.7.7 0 1.9-.9 3.2-.8.5 0 2.1.2 3 1.7-.1 0-1.8 1.1-1.8 3.2 0 2.5 2.2 3.4 2.2 3.4-.1.2-.4 1.2-1.1 2.6zm-3.9-13C12.3 2.2 11.3 1 10 1c-.1 1-.3 2-.9 2.7-.6.7-1.5 1.3-2.5 1.2-.1-1 .3-2 .9-2.7.7-.8 1.8-1.4 2.6-1z"/></svg>
+              Download on App Store
+            </a>
+            <a href="#support" class="btn btn-outline">Get support</a>
+          </div>
+        </div>
+
+        <!-- Right: phone mockup -->
+        <div class="hero-phone fade d3">
+          <div class="phone-frame">
+            <div class="phone-screen">
+              <!--
+                Phone screen mockup — accurately reflects the app UI:
+                · 6 jars with 10 total items (matches badge counts)
+                · Floating "New Jar" amber button at the bottom
+                · No tab bar (matches actual app)
+              -->
+              <svg width="214" height="456" viewBox="0 0 214 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="214" height="456" fill="#FDF6EE"/>
+
+                <!-- Status bar -->
+                <text x="18" y="50" font-size="11" font-weight="600" fill="#3D2B1F" font-family="system-ui">9:41</text>
+
+                <!-- Page title -->
+                <text x="18" y="76" font-size="19" fill="#3D2B1F" font-style="italic" font-family="Georgia,serif">My Jars</text>
+
+                <!-- Subtitle: 6 jars · 10 items -->
+                <text x="18" y="90" font-size="8.5" fill="rgba(61,43,31,0.45)" font-family="system-ui">6 jars · 10 items</text>
+
+                <!-- App icon top right — bottom edge level with subtitle -->
+                <!-- icon sits from y=62 to y=90, matching subtitle baseline -->
+                <defs>
+                  <clipPath id="hdrClip">
+                    <rect x="170" y="62" width="28" height="28" rx="6"/>
+                  </clipPath>
+                </defs>
+                <image href="icon.png" x="170" y="62" width="28" height="28" clip-path="url(#hdrClip)"/>
+                <!-- Fallback stacked bars shown when icon.png is absent -->
+                <rect x="170" y="62" width="28" height="28" rx="6" fill="#B07D4A" opacity="0.12"/>
+                <rect x="174" y="69" width="20" height="5" rx="1.5" fill="#B07D4A" opacity="0.45"/>
+                <rect x="174" y="76" width="20" height="5" rx="1.5" fill="#B07D4A" opacity="0.3"/>
+                <rect x="174" y="83" width="20" height="5" rx="1.5" fill="#B07D4A" opacity="0.2"/>
+
+                <!-- Search bar -->
+                <rect x="14" y="99" width="186" height="24" rx="7" fill="white" fill-opacity="0.75" stroke="rgba(176,125,74,0.2)" stroke-width="1"/>
+                <text x="30" y="115" font-size="8.5" fill="rgba(154,107,70,0.45)" font-family="system-ui">Search jars and items…</text>
+
+                <!-- ── Row 1 ─────────────────────────────── -->
+
+                <!-- App Ideas — lavender — lightbulb SVG icon -->
+                <rect x="14" y="131" width="88" height="84" rx="12" fill="#EEE8FA" stroke="#C0A8E8" stroke-width="1"/>
+                <circle cx="36" cy="152" r="13" fill="rgba(122,90,181,0.14)"/>
+                <!-- lightbulb: bulb body, filament base, base plates -->
+                <path d="M36 143 a5 5 0 0 1 3.5 8.5 l0 2 a.5.5 0 0 1-.5.5 h-6 a.5.5 0 0 1-.5-.5 l0-2 A5 5 0 0 1 36 143z" fill="#7A5AB5"/>
+                <rect x="32.5" y="154.5" width="7" height="1.2" rx=".6" fill="#7A5AB5"/>
+                <rect x="33.5" y="156.5" width="5" height="1.2" rx=".6" fill="#7A5AB5"/>
+                <text x="77" y="145" font-size="7.5" font-weight="600" fill="#4E3278" font-family="system-ui">2</text>
+                <text x="22" y="182" font-size="9.5" fill="#4E3278" font-style="italic" font-family="Georgia,serif">App Ideas</text>
+                <text x="22" y="195" font-size="7" fill="rgba(78,50,120,0.55)" font-style="italic" font-family="system-ui">"A habit tracker…"</text>
+
+                <!-- Gift Ideas — rose — gift box SVG icon -->
+                <rect x="112" y="131" width="88" height="84" rx="12" fill="#FAE8EE" stroke="#E8A0B8" stroke-width="1"/>
+                <circle cx="134" cy="152" r="13" fill="rgba(181,74,110,0.13)"/>
+                <!-- gift: box body, lid, ribbon vertical, ribbon bow left, ribbon bow right -->
+                <rect x="128" y="149" width="12" height="8" rx="1" fill="#B54A6E" opacity=".85"/>
+                <rect x="127.5" y="146.5" width="13" height="3" rx="1" fill="#B54A6E"/>
+                <line x1="134" y1="146.5" x2="134" y2="157" stroke="white" stroke-width="1.2"/>
+                <path d="M134 146.5 c-1-2-3.5-2-3.5 0 s2 1.5 3.5 0" fill="white" opacity=".8"/>
+                <path d="M134 146.5 c1-2 3.5-2 3.5 0 s-2 1.5-3.5 0" fill="white" opacity=".8"/>
+                <text x="175" y="145" font-size="7.5" font-weight="600" fill="#7A2A48" font-family="system-ui">2</text>
+                <text x="120" y="182" font-size="9.5" fill="#7A2A48" font-style="italic" font-family="Georgia,serif">Gift Ideas</text>
+                <text x="120" y="195" font-size="7" fill="rgba(122,42,72,0.55)" font-style="italic" font-family="system-ui">"Mum — gloves…"</text>
+
+                <!-- ── Row 2 ─────────────────────────────── -->
+
+                <!-- Recipes — peach — fork and knife SVG icon -->
+                <rect x="14" y="223" width="88" height="84" rx="12" fill="#FAF0E8" stroke="#F0C090" stroke-width="1"/>
+                <circle cx="36" cy="244" r="13" fill="rgba(200,122,58,0.13)"/>
+                <!-- fork: handle, tines -->
+                <line x1="33" y1="237" x2="33" y2="251" stroke="#C87A3A" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M31.5 237 l0 4 a1.5 1.5 0 0 0 3 0 l0-4" fill="none" stroke="#C87A3A" stroke-width="1.4" stroke-linecap="round"/>
+                <!-- knife: handle, blade -->
+                <line x1="39" y1="237" x2="39" y2="251" stroke="#C87A3A" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M39 237 l0 5 a2 3 0 0 0 2 2.5" fill="none" stroke="#C87A3A" stroke-width="1.4" stroke-linecap="round"/>
+                <text x="77" y="237" font-size="7.5" font-weight="600" fill="#8A4E1E" font-family="system-ui">1</text>
+                <text x="22" y="274" font-size="9.5" fill="#8A4E1E" font-style="italic" font-family="Georgia,serif">Recipes</text>
+                <text x="22" y="287" font-size="7" fill="rgba(138,78,30,0.55)" font-style="italic" font-family="system-ui">"Ottolenghi…"</text>
+
+                <!-- Travel Dreams — sage — airplane SVG icon -->
+                <rect x="112" y="223" width="88" height="84" rx="12" fill="#E8F2E8" stroke="#A8CCA8" stroke-width="1"/>
+                <circle cx="134" cy="244" r="13" fill="rgba(74,122,74,0.13)"/>
+                <!-- airplane: fuselage, wings, tail -->
+                <path d="M141 240 l-4-1 -2-4 -1.5 3.5 -4.5-1 -.5 1.5 3.5 2 -1.5 4 2 .5 2-3 5.5 4 .5-1.5 -3-5 3.5-1z" fill="#4A7A4A"/>
+                <text x="175" y="237" font-size="7.5" font-weight="600" fill="#2E5A2E" font-family="system-ui">2</text>
+                <text x="120" y="274" font-size="9.5" fill="#2E5A2E" font-style="italic" font-family="Georgia,serif">Travel Dreams</text>
+                <text x="120" y="287" font-size="7" fill="rgba(46,90,46,0.55)" font-style="italic" font-family="system-ui">"Kyoto in spring…"</text>
+
+                <!-- ── Row 3 ─────────────────────────────── -->
+
+                <!-- Films & Books — sky — film frame SVG icon -->
+                <rect x="14" y="315" width="88" height="84" rx="12" fill="#E0EEFA" stroke="#90BCE8" stroke-width="1"/>
+                <circle cx="36" cy="336" r="13" fill="rgba(58,120,181,0.13)"/>
+                <!-- film frame: outer rect, corner squares, centre window -->
+                <rect x="28" y="329" width="16" height="14" rx="1.5" fill="rgba(58,120,181,0.2)" stroke="#3A78B5" stroke-width="1.2"/>
+                <rect x="28" y="329" width="3.5" height="3.5" rx=".5" fill="#3A78B5"/>
+                <rect x="40.5" y="329" width="3.5" height="3.5" rx=".5" fill="#3A78B5"/>
+                <rect x="28" y="339.5" width="3.5" height="3.5" rx=".5" fill="#3A78B5"/>
+                <rect x="40.5" y="339.5" width="3.5" height="3.5" rx=".5" fill="#3A78B5"/>
+                <text x="77" y="329" font-size="7.5" font-weight="600" fill="#1E4D7A" font-family="system-ui">2</text>
+                <text x="22" y="366" font-size="9.5" fill="#1E4D7A" font-style="italic" font-family="Georgia,serif">Films &amp; Books</text>
+                <text x="22" y="379" font-size="7" fill="rgba(30,77,122,0.55)" font-style="italic" font-family="system-ui">"All of Us…"</text>
+
+                <!-- Quotes — amber — speech bubble SVG icon -->
+                <rect x="112" y="315" width="88" height="84" rx="12" fill="#FDF0DC" stroke="#E8C98A" stroke-width="1"/>
+                <circle cx="134" cy="336" r="13" fill="rgba(176,125,74,0.13)"/>
+                <!-- speech bubble: rounded rect body, tail triangle -->
+                <path d="M127 329 a2 2 0 0 1 2-2 h10 a2 2 0 0 1 2 2 v7 a2 2 0 0 1-2 2 h-5 l-3.5 2.5 1-2.5 h-.5 a2 2 0 0 1-2-2z" fill="#B07D4A"/>
+                <text x="175" y="329" font-size="7.5" font-weight="600" fill="#6B4A28" font-family="system-ui">1</text>
+                <text x="120" y="366" font-size="9.5" fill="#6B4A28" font-style="italic" font-family="Georgia,serif">Quotes</text>
+                <text x="120" y="379" font-size="7" fill="rgba(107,74,40,0.55)" font-style="italic" font-family="system-ui">"The secret of…"</text>
+
+                <!-- ── Floating "New Jar" button ───────────
+                     Right-aligned to match actual app UI   -->
+                <rect x="96" y="420" width="104" height="26" rx="13" fill="#B07D4A"/>
+                <text x="148" y="437" font-size="9.5" fill="white" text-anchor="middle" font-weight="500" font-family="system-ui">+ New Jar</text>
+
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Disclaimer sits outside the two-column grid so it spans full width below the mockup -->
+      <p style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:14px;font-family:var(--font-mono);line-height:1.5;">
+        Icons shown are illustrative. In-app icons use Apple SF Symbols, which are licensed for use within Apple platform apps only.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       FEATURES
+       ══════════════════════════════════════════════════════ -->
+  <section>
+    <div class="wrap">
+      <p class="section-label">What it does</p>
+      <h2 class="section-title">Simple by design. <em>Useful by nature.</em></h2>
+      <p class="section-body">My Jars does one thing — gives you a beautiful, private home for the things you want to remember. No complexity, no setup, no account required.</p>
+      <div class="features-grid">
+
+        <div class="feature-cell">
+          <div class="feature-icon">
+            <svg viewBox="0 0 18 18" fill="none" stroke="#B07D4A" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="3"/><path d="M6 9h6M6 6h6M6 12h4"/></svg>
+          </div>
+          <h3>Unlimited jars</h3>
+          <p>Create as many collections as you like — one for every corner of your life.</p>
+        </div>
+
+        <div class="feature-cell">
+          <div class="feature-icon">
+            <svg viewBox="0 0 18 18" fill="none" stroke="#B07D4A" stroke-width="1.5" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5"/><path d="M11.5 11.5l4 4"/></svg>
+          </div>
+          <h3>Search everything</h3>
+          <p>One search finds items instantly across every jar at once.</p>
+        </div>
+
+        <div class="feature-cell">
+          <div class="feature-icon">
+            <svg viewBox="0 0 18 18" fill="none" stroke="#B07D4A" stroke-width="1.5" stroke-linecap="round"><path d="M9 2a5 5 0 0 1 3 9v2H6v-2A5 5 0 0 1 9 2z"/><rect x="6.5" y="13" width="5" height="1" rx=".5"/></svg>
+          </div>
+          <h3>35 SF Symbol icons</h3>
+          <p>Apple's native icon library — crisp, free, adapts to all screen sizes.</p>
+        </div>
+
+        <div class="feature-cell">
+          <div class="feature-icon">
+            <svg viewBox="0 0 18 18" fill="none" stroke="#B07D4A" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="3"/><rect x="5" y="5" width="3" height="3" rx=".5"/><rect x="10" y="5" width="3" height="3" rx=".5"/><rect x="5" y="10" width="3" height="3" rx=".5"/><rect x="10" y="10" width="3" height="3" rx=".5"/></svg>
+          </div>
+          <h3>6 colour themes</h3>
+          <p>Amber, rose, sage, sky, lavender, peach. Each jar has its own identity.</p>
+        </div>
+
+        <div class="feature-cell">
+          <div class="feature-icon">
+            <svg viewBox="0 0 18 18" fill="none" stroke="#B07D4A" stroke-width="1.5" stroke-linecap="round"><path d="M3 9a6 6 0 0 1 12 0"/><path d="M3 9c0 3.3 2.7 6 6 6s6-2.7 6-6"/><line x1="9" y1="3" x2="9" y2="1"/><line x1="9" y1="15" x2="9" y2="17"/></svg>
+          </div>
+          <h3>Links supported</h3>
+          <p>Drop a URL alongside any note — save recipes, products, articles online.</p>
+        </div>
+
+        <div class="feature-cell">
+          <div class="feature-icon">
+            <svg viewBox="0 0 18 18" fill="none" stroke="#B07D4A" stroke-width="1.5" stroke-linecap="round"><path d="M9 2L11.5 7H16L12 10l1.5 5L9 12.5 4.5 15 6 10 2 7h4.5z"/></svg>
+          </div>
+          <h3>Free</h3>
+          <p>Free to download. No subscription. No adverts. No hidden anything.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       TECH STACK
+       ══════════════════════════════════════════════════════ -->
+  <section>
+    <div class="wrap">
+      <p class="section-label">Built with</p>
+      <h2 class="section-title">The tech <em>behind the jars.</em></h2>
+      <p class="section-body">My Jars is built entirely with Apple's native frameworks — no third-party dependencies, no external services, no backend infrastructure of any kind.</p>
+      <div class="stack-grid">
+
+        <div class="stack-item">
+          <span class="stack-tag">SwiftUI</span>
+          <div class="stack-item-body">
+            <h4>Declarative UI framework</h4>
+            <p>The entire app is built in SwiftUI — Apple's modern framework for building native iOS interfaces with clean, readable code.</p>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <span class="stack-tag">UserDefaults</span>
+          <div class="stack-item-body">
+            <h4>Local persistence</h4>
+            <p>All data is stored on-device using UserDefaults with JSON encoding. No database, no server, no network calls of any kind.</p>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <span class="stack-tag">SF Symbols</span>
+          <div class="stack-item-body">
+            <h4>Apple's icon system</h4>
+            <p>All icons use Apple's SF Symbols — 35 options for jar icons, free to use in App Store apps, no attribution required.</p>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <span class="stack-tag">Combine</span>
+          <div class="stack-item-body">
+            <h4>Reactive data layer</h4>
+            <p>The ObservableObject store uses @Published to keep the UI in sync with data automatically across all views.</p>
+          </div>
+        </div>
+
+        <div class="stack-item">
+          <span class="stack-tag">StoreKit 2</span>
+          <div class="stack-item-body">
+            <h4>Review prompts</h4>
+            <p>SKStoreReviewController prompts engaged users for a rating at natural moments — after adding their 3rd, 10th and 30th item.</p>
+          </div>
+        </div>
+
+
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       PRIVACY
+       ══════════════════════════════════════════════════════ -->
+  <section>
+    <div class="wrap">
+      <p class="section-label">Privacy</p>
+      <h2 class="section-title">Your data stays <em>on your device.</em></h2>
+      <p class="section-body">My Jars was built with privacy as a first principle. Apple lists My Jars as "No Data Collected" on the App Store listing.</p>
+      <div class="privacy-grid">
+
+        <div class="privacy-card">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 2L3 5v5c0 4.4 3 8.2 7 9 4-.8 7-4.6 7-9V5l-7-3z"/><path d="M7 10l2 2 4-4"/></svg>
+          <div>
+            <h4>No data collected</h4>
+            <p>Nothing is ever sent anywhere. Your jar contents never leave your phone.</p>
+          </div>
+        </div>
+
+        <div class="privacy-card">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="8" width="14" height="10" rx="2"/><path d="M7 8V6a3 3 0 0 1 6 0v2"/></svg>
+          <div>
+            <h4>No account required</h4>
+            <p>Open the app and start immediately. No sign-up, no email, no password.</p>
+          </div>
+        </div>
+
+        <div class="privacy-card">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><line x1="10" y1="6" x2="10" y2="10"/><line x1="10" y1="13" x2="10" y2="14"/></svg>
+          <div>
+            <h4>No tracking</h4>
+            <p>No analytics SDK, no advertising framework, no third-party code of any kind.</p>
+          </div>
+        </div>
+
+        <div class="privacy-card">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="3" width="16" height="14" rx="2"/><path d="M7 8h6M7 12h4"/></svg>
+          <div>
+            <h4>No backend infrastructure</h4>
+            <p>There is no server, no cloud database, no API. Entirely self-contained on your device.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       ABOUT
+       ══════════════════════════════════════════════════════ -->
+  <section>
+    <div class="wrap">
+      <p class="section-label">About</p>
+      <h2 class="section-title">Built by one person, <em>for everyone.</em></h2>
+      <div class="about-inner">
+
+        <div class="about-text">
+          <p>My Jars started as a simple idea — a <strong>calm, private place to keep the things you want to remember</strong> without the overhead of a notes app or the pressure of a to-do list.</p>
+          <p>It was built entirely in SwiftUI as a solo hobbyist project. The whole experience — from the warm colour palette to the one-tap item entry — was designed to feel personal and unhurried.</p>
+          <p>Version 1.0 is deliberately simple. Future updates will add features based on genuine user feedback. If you have a suggestion, I want to hear it.</p>
+        </div>
+
+        <ul class="timeline">
+          <li>
+            <div class="tl-dot">v1</div>
+            <div class="tl-content">
+              <h4>Version 1.0 — Initial release</h4>
+              <p>Unlimited jars, 35 icons, 6 colours, full search, links, swipe to delete, edit items, local storage.</p>
+            </div>
+          </li>
+          <li>
+            <div class="tl-dot">v1.1</div>
+            <div class="tl-content">
+              <h4>Version 1.1 — Coming soon</h4>
+              <p>Dark mode support, item starring, jar sorting, support screen.</p>
+            </div>
+          </li>
+          <li>
+            <div class="tl-dot">...</div>
+            <div class="tl-content">
+              <h4>Future versions — to be decided</h4>
+              <p>Features beyond v1.1 will be shaped entirely by user feedback. If you have a suggestion, get in touch.</p>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       SUPPORT
+       ══════════════════════════════════════════════════════ -->
+  <section id="support">
+    <div class="wrap">
+      <p class="section-label">Support</p>
+      <h2 class="section-title">Here if you <em>need anything.</em></h2>
+      <p class="section-body">My Jars is a solo indie project. Questions, bugs, or feature ideas — reach out. Every message gets a personal reply.</p>
+      <div class="support-grid">
+
+        <div class="support-card">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="22" height="18" rx="2"/><path d="M3 8l11 8 11-8"/></svg>
+          <h3>Email support</h3>
+          <p>For bug reports, feature requests, or anything else. I aim to reply within 48 hours.</p>
+          <!-- Replace with your real support email address -->
+          <a href="/cdn-cgi/l/email-protection#cbb8bebbbba4b9bf8ba6b2a1aab9b8aabbbbe5a8a4a6"><span class="__cf_email__" data-cfemail="30434540405f4244705d495a5142435140401e535f5d">[email&#160;protected]</span></a>
+        </div>
+
+        <div class="support-card">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 3C8 3 3 8 3 14s5 11 11 11 11-5 11-11S20 3 14 3z"/><path d="M9 14s1-4 5-4 5 4 5 4"/><path d="M9 14c0 3.5 2 5 5 5s5-1.5 5-5"/></svg>
+          <h3>App Store</h3>
+          <p>Leave a review or rating on the App Store. Every review is read and genuinely appreciated.</p>
+          <!-- Replace href="#" with your App Store link -->
+          <a href="#">Rate My Jars →</a>
+        </div>
+
+        <div class="support-card">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="14" cy="14" r="11"/><path d="M14 9v5l4 2"/></svg>
+          <h3>Response time</h3>
+          <p>Usually within 24–48 hours on weekdays. Every message is read personally.</p>
+          <a href="#privacy-policy">Privacy policy ↓</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       PRIVACY POLICY
+       ══════════════════════════════════════════════════════ -->
+  <section id="privacy-policy">
+    <div class="wrap">
+      <p class="section-label">Privacy policy</p>
+      <h2 class="section-title">Plain English. <em>No surprises.</em></h2>
+      <p class="section-body">This is the complete privacy policy for My Jars. It is intentionally short because there is very little to say.</p>
+      <div class="policy-box">
+        <h3>Privacy Policy — My Jars</h3>
+        <p><strong>Last updated: March 2026</strong></p>
+        <p>My Jars does not collect, store, transmit or share any personal data. The app has no analytics, no advertising framework, no third-party SDKs, and no backend server of any kind.</p>
+        <p><strong>Data storage.</strong> All data you enter — jar names, items, links — is stored exclusively on your device using iOS UserDefaults. This data never leaves your device and is not accessible to the developer or any third party.</p>
+        <p><strong>No account required.</strong> My Jars does not require you to create an account, provide an email address, or share any personal information to use the app.</p>
+        <p><strong>No tracking.</strong> My Jars does not track your behaviour, location, usage patterns or any other information. There is no analytics code of any kind in the app.</p>
+        <p><strong>App Store reviews.</strong> If you choose to leave a review on the App Store, that review is governed by Apple's own privacy policy, not ours.</p>
+        <p><strong>Contact.</strong> If you contact us by email for support, your email address is used solely to reply to your message and is not stored, shared or used for any other purpose.</p>
+        <p><strong>Changes.</strong> If this policy ever changes, the updated version will be posted at this URL with a new date. Given the nature of this app, significant changes are unlikely.</p>
+        <p>Questions? Email <a href="/cdn-cgi/l/email-protection#3e4d4b4e4e514c4a7e5347545f4c4d5f4e4e105d5153"><span class="__cf_email__" data-cfemail="98ebede8e8f7eaecd8f5e1f2f9eaebf9e8e8b6fbf7f5">[email&#160;protected]</span></a></p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════ -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-inner">
+
+        <div class="footer-left">
+          <!--
+            Footer icon — also uses icon.png if present,
+            falls back to the amber SVG stack if not.
+          -->
+          <div class="footer-icon">
+            <img src="icon.png" alt="My Jars"
+                 onerror="this.parentElement.innerHTML='<div class=\'footer-icon-fallback\'><svg viewBox=\'0 0 15 15\' fill=\'none\'><rect x=\'2\' y=\'9\' width=\'11\' height=\'4\' rx=\'1.5\' fill=\'white\' opacity=\'0.9\'/><rect x=\'2\' y=\'5\' width=\'11\' height=\'4\' rx=\'1.5\' fill=\'white\' opacity=\'0.65\'/><rect x=\'2\' y=\'1\' width=\'11\' height=\'4\' rx=\'1.5\' fill=\'white\' opacity=\'0.4\'/></svg></div>'" />
+          </div>
+          <span class="footer-name">My Jars</span>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="#support">Support</a></li>
+          <li><a href="#priva
